@@ -1,0 +1,517 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastel Pomodoro Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Added Baloo 2 font with multiple weights -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Baloo 2', cursive;
+            background: linear-gradient(135deg, #ffe6ea 0%, #ffccd5 50%, #ffc2e2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .star {
+            position: absolute;
+            opacity: 0.6;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+            100% { opacity: 0.4; transform: scale(1); }
+        }
+        
+        .timer-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-color: white;
+        }
+        
+        .timer-circle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--progress-color) var(--progress), #e2e8f0 0);
+            mask: radial-gradient(transparent 65%, black 66%);
+            -webkit-mask: radial-gradient(transparent 65%, black 66%);
+        }
+        
+        .mode-button {
+            transition: all 0.3s ease;
+        }
+        
+        .mode-button.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .task-item {
+            transition: all 0.3s ease;
+        }
+        
+        .task-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .control-button {
+            transition: all 0.2s ease;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .control-button:active {
+            transform: scale(0.95);
+        }
+        
+        .editable {
+            border-bottom: 1px dashed #ffa1c9;
+            padding: 2px 4px;
+            min-width: 50px;
+            outline: none;
+        }
+        
+        .editable:focus {
+            border-bottom: 1px solid #ffa1c9;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        @keyframes flash {
+            0% { background-color: #f9f7fe; }
+            50% { background-color: #ffa1c9; }
+            100% { background-color: #f9f7fe; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Custom styles for Baloo 2 font */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+        
+        .timer-display {
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        
+        button {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars Background -->
+    <div id="stars-container"></div>
+    
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white rounded-3xl shadow-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold text-center mb-6 text-purple-600">Pomodoro Timer</h1>
+            
+            <!-- Mode Buttons - Above the clock -->
+            <div class="flex justify-center gap-3 mb-6">
+                <button id="work-btn" class="mode-button active bg-pink-200 hover:bg-pink-300 text-pink-800 px-4 py-2 rounded-full">
+                    Work
+                </button>
+                <button id="short-btn" class="mode-button bg-blue-200 hover:bg-blue-300 text-blue-800 px-4 py-2 rounded-full">
+                    Short Break
+                </button>
+                <button id="long-btn" class="mode-button bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-full">
+                    Long Break
+                </button>
+            </div>
+            
+            <!-- Timer Circle -->
+            <div class="flex justify-center mb-6">
+                <div class="timer-circle" style="--progress: 100%; --progress-color: #ffa1c9;">
+                    <div class="text-center">
+                        <div id="time" class="timer-display text-5xl font-bold text-gray-700">25:00</div>
+                        <div id="mode-label" class="text-lg mt-2" style="color: #ffa1c9;">Work Mode</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Buttons - Icons only -->
+            <div class="flex justify-center gap-6 mb-4">
+                <button id="start-btn" class="control-button bg-green-400 hover:bg-green-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                <button id="pause-btn" class="control-button bg-yellow-400 hover:bg-yellow-500 text-white" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                <button id="reset-btn" class="control-button bg-red-400 hover:bg-red-500 text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Task Management -->
+        <div class="bg-white rounded-3xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-center mb-6 text-purple-600">Tasks</h2>
+            
+            <!-- Add Task Form -->
+            <div class="flex mb-6">
+                <input id="new-task" type="text" placeholder="Add a new task..." 
+                    class="flex-grow px-4 py-2 border border-purple-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-300">
+                <button id="add-task-btn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-r-lg text-xl font-bold">
+                    +
+                </button>
+            </div>
+            
+            <!-- Active Task List -->
+            <h3 class="font-semibold mb-2 text-purple-600">Active Tasks</h3>
+            <div id="task-list" class="space-y-3 mb-8">
+                <!-- Tasks will be added here dynamically -->
+            </div>
+            
+            <!-- Completed Task List -->
+            <h3 class="font-semibold mb-2 text-pink-500">Finished Tasks</h3>
+            <div id="completed-task-list" class="space-y-3">
+                <!-- Completed tasks will be moved here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars in the background
+        function createStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const numStars = 30;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Random star size between 10px and 20px
+                const size = Math.random() * 10 + 10;
+                
+                // Random position
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                
+                // Random animation delay
+                const delay = Math.random() * 3;
+                
+                // Create star SVG
+                star.innerHTML = `
+                    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="#ffffff" opacity="0.7">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                `;
+                
+                // Set position and animation
+                star.style.left = `${left}%`;
+                star.style.top = `${top}%`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Timer variables
+        let timer;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let isRunning = false;
+        let currentMode = 'work';
+        const modes = {
+            work: { time: 25 * 60, color: '#ffa1c9', label: 'Work Mode' },
+            shortBreak: { time: 5 * 60, color: '#a1c4ff', label: 'Short Break' },
+            longBreak: { time: 20 * 60, color: '#d4a1ff', label: 'Long Break' }
+        };
+
+        // DOM elements
+        const timeDisplay = document.getElementById('time');
+        const modeLabel = document.getElementById('mode-label');
+        const timerCircle = document.querySelector('.timer-circle');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const workBtn = document.getElementById('work-btn');
+        const shortBtn = document.getElementById('short-btn');
+        const longBtn = document.getElementById('long-btn');
+        const newTaskInput = document.getElementById('new-task');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+        const completedTaskList = document.getElementById('completed-task-list');
+
+        // Format time as MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            return `${mins}:${secs}`;
+        }
+
+        // Update timer display
+        function updateDisplay() {
+            timeDisplay.textContent = formatTime(timeLeft);
+            const totalTime = modes[currentMode].time;
+            const progress = (timeLeft / totalTime) * 100;
+            timerCircle.style.setProperty('--progress', `${progress}%`);
+            timerCircle.style.setProperty('--progress-color', modes[currentMode].color);
+            
+            // Set mode label color to match the circle color
+            modeLabel.style.color = modes[currentMode].color;
+        }
+
+        // Set timer mode
+        function setMode(mode) {
+            currentMode = mode;
+            timeLeft = modes[mode].time;
+            modeLabel.textContent = modes[mode].label;
+            
+            // Update active button
+            [workBtn, shortBtn, longBtn].forEach(btn => btn.classList.remove('active'));
+            if (mode === 'work') workBtn.classList.add('active');
+            else if (mode === 'shortBreak') shortBtn.classList.add('active');
+            else longBtn.classList.add('active');
+            
+            updateDisplay();
+            
+            // Reset timer state if it was running
+            if (isRunning) {
+                clearInterval(timer);
+                startTimer();
+            }
+        }
+
+        // Start timer
+        function startTimer() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    isRunning = false;
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    
+                    // Timer completed notification
+                    timerCompleted();
+                    
+                    // Reset timer
+                    timeLeft = modes[currentMode].time;
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        // Timer completed
+        function timerCompleted() {
+            // Visual notification
+            document.body.style.animation = 'flash 0.5s 3';
+            document.body.style.animationTimingFunction = 'ease-in-out';
+            
+            // Note: Audio would be added here if it was supported
+            
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 1500);
+        }
+
+        // Pause timer
+        function pauseTimer() {
+            if (!isRunning) return;
+            
+            clearInterval(timer);
+            isRunning = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        // Reset timer
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            timeLeft = modes[currentMode].time;
+            updateDisplay();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        // Task management functions
+        let tasks = [];
+        let completedTasks = [];
+        let taskIdCounter = 0;
+
+        function addTask(text) {
+            if (!text.trim()) return;
+            
+            const task = {
+                id: taskIdCounter++,
+                text: text,
+                completed: false
+            };
+            
+            tasks.push(task);
+            renderTasks();
+            newTaskInput.value = '';
+        }
+
+        function toggleTaskCompletion(id) {
+            const taskIndex = tasks.findIndex(t => t.id === id);
+            if (taskIndex !== -1) {
+                const task = tasks[taskIndex];
+                task.completed = true;
+                
+                // Move to completed tasks
+                completedTasks.push(task);
+                tasks.splice(taskIndex, 1);
+                
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id, isCompleted = false) {
+            if (isCompleted) {
+                completedTasks = completedTasks.filter(t => t.id !== id);
+            } else {
+                tasks = tasks.filter(t => t.id !== id);
+            }
+            renderTasks();
+        }
+
+        function renderTasks() {
+            // Render active tasks
+            taskList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No active tasks. Add one above!
+                    </div>
+                `;
+            } else {
+                tasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `task-item flex items-center justify-between p-3 rounded-lg bg-purple-50`;
+                    
+                    taskElement.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" class="w-5 h-5 accent-purple-500">
+                            <span class="task-text editable" contenteditable="true">${task.text}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="delete-btn text-red-500 hover:text-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    const checkbox = taskElement.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+                    
+                    const taskText = taskElement.querySelector('.task-text');
+                    taskText.addEventListener('blur', () => {
+                        task.text = taskText.textContent;
+                    });
+                    
+                    const deleteBtn = taskElement.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+                    
+                    taskList.appendChild(taskElement);
+                });
+            }
+            
+            // Render completed tasks
+            completedTaskList.innerHTML = '';
+            
+            if (completedTasks.length === 0) {
+                completedTaskList.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No finished tasks yet.
+                    </div>
+                `;
+            } else {
+                completedTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `task-item flex items-center justify-between p-3 rounded-lg bg-pink-50`;
+                    
+                    taskElement.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span class="task-text line-through text-gray-500">${task.text}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="delete-btn text-red-500 hover:text-red-700">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    const deleteBtn = taskElement.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', () => deleteTask(task.id, true));
+                    
+                    completedTaskList.appendChild(taskElement);
+                });
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        
+        workBtn.addEventListener('click', () => setMode('work'));
+        shortBtn.addEventListener('click', () => setMode('shortBreak'));
+        longBtn.addEventListener('click', () => setMode('longBreak'));
+        
+        addTaskBtn.addEventListener('click', () => addTask(newTaskInput.value));
+        newTaskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask(newTaskInput.value);
+        });
+
+        // Initialize
+        createStars();
+        updateDisplay();
+        renderTasks();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94b1f4cbf52d066e',t:'MTc0OTE1MDQ4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
