@@ -1,0 +1,1264 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextShot Billiards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --jet: #312F2C;
+            --goldenrod: #D5A038;
+            --dark-goldenrod: #B07C28;
+            --peach-yellow: #F2D89D;
+            --old-lace: #F4EDDD;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--jet);
+            color: var(--old-lace);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        
+        .app-container {
+            max-width: 430px;
+            height: 100vh;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+            overflow-y: auto;
+            padding-bottom: 80px;
+        }
+        
+        .hidden-screen {
+            transform: translateX(100%);
+        }
+        
+        .btn-primary {
+            background-color: var(--goldenrod);
+            color: var(--jet);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--dark-goldenrod);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(213, 160, 56, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--dark-goldenrod);
+            color: var(--old-lace);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(213, 160, 56, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn-selected {
+            background-color: var(--goldenrod);
+            color: var(--jet);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: var(--goldenrod);
+        }
+        
+        .nav-item:hover {
+            color: var(--goldenrod);
+        }
+        
+        .card {
+            background-color: rgba(49, 47, 44, 0.8);
+            border: 1px solid var(--dark-goldenrod);
+            border-radius: 12px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background-color: rgba(244, 237, 221, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--goldenrod);
+            border-radius: 3px;
+            transition: width 1s ease-out;
+        }
+        
+        .table-cell {
+            transition: all 0.3s ease;
+        }
+        
+        .table-cell:hover {
+            transform: scale(1.05);
+        }
+        
+        .table-available {
+            background-color: rgba(75, 181, 67, 0.2);
+            border: 1px solid rgba(75, 181, 67, 0.5);
+        }
+        
+        .table-occupied {
+            background-color: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .table-premium {
+            background-color: rgba(213, 160, 56, 0.2);
+            border: 1px solid rgba(213, 160, 56, 0.5);
+        }
+        
+        .rank-badge {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .rank-bronze {
+            background: linear-gradient(135deg, #a77044 0%, #cd9c6a 100%);
+            color: #312F2C;
+        }
+        
+        .rank-silver {
+            background: linear-gradient(135deg, #b4b4b4 0%, #e0e0e0 100%);
+            color: #312F2C;
+        }
+        
+        .rank-gold {
+            background: linear-gradient(135deg, #D5A038 0%, #f2d89d 100%);
+            color: #312F2C;
+        }
+        
+        .rank-diamond {
+            background: linear-gradient(135deg, #9ac5db 0%, #c9f0ff 100%);
+            color: #312F2C;
+        }
+        
+        .rank-black {
+            background: linear-gradient(135deg, #333333 0%, #666666 100%);
+            color: #F4EDDD;
+            border: 1px solid var(--goldenrod);
+        }
+        
+        .find-match-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .find-match-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(213, 160, 56, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+        }
+        
+        .find-match-btn:hover::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .nine-ball {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(213, 160, 56, 0.5);
+        }
+        
+        .nine-ball::after {
+            content: '9';
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            background: #D5A038;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tournament-card {
+            transition: all 0.3s ease;
+        }
+        
+        .tournament-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(244, 237, 221, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--dark-goldenrod);
+            border-radius: 3px;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        .match-found-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(49, 47, 44, 0.95);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .match-found-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .vs-badge {
+            width: 40px;
+            height: 40px;
+            background-color: var(--goldenrod);
+            color: var(--jet);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 0 -10px;
+            z-index: 2;
+        }
+        
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            background-color: var(--dark-goldenrod);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            border: 3px solid var(--goldenrod);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Welcome/Login Screen -->
+        <div id="welcome-screen" class="screen flex flex-col items-center justify-center p-6">
+            <div class="flex flex-col items-center mb-12 fade-in">
+                <div class="nine-ball mb-4"></div>
+                <h1 class="cinzel text-4xl font-bold text-goldenrod mb-2">NextShot</h1>
+                <h2 class="cinzel text-2xl text-peach-yellow">Billiards</h2>
+                <p class="text-sm text-old-lace/70 mt-2">Premium Pool Experience</p>
+            </div>
+            
+            <div class="w-full max-w-xs slide-up" style="animation-delay: 0.2s;">
+                <div class="card p-6 mb-6">
+                    <h3 class="cinzel text-xl mb-4 text-center text-goldenrod">Sign In</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <input type="email" class="w-full bg-jet border border-dark-goldenrod rounded-lg p-3 text-jet focus:border-goldenrod focus:outline-none" placeholder="your@email.com">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <input type="password" class="w-full bg-jet border border-dark-goldenrod rounded-lg p-3 text-jet focus:border-goldenrod focus:outline-none" placeholder="••••••••">
+                    </div>
+                    <button onclick="showScreen('home-screen')" class="btn-primary w-full py-3 rounded-lg font-semibold mb-3">Sign In</button>
+                    <button onclick="showScreen('home-screen')" class="btn-secondary w-full py-3 rounded-lg font-semibold">Continue as Guest</button>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm">
+                    <button class="text-peach-yellow hover:text-goldenrod transition">Create Account</button>
+                    <button class="text-peach-yellow hover:text-goldenrod transition">Forgot Password?</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Home Screen -->
+        <div id="home-screen" class="screen hidden-screen p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="cinzel text-2xl font-bold text-goldenrod">NextShot</h1>
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-dark-goldenrod rounded-full flex items-center justify-center mr-2">
+                        <span class="font-bold">TN</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card p-5 mb-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-16 h-16 bg-dark-goldenrod rounded-full flex items-center justify-center mr-4">
+                        <span class="font-bold text-xl">TN</span>
+                    </div>
+                    <div>
+                        <h2 class="font-semibold text-lg">Tran Nguyen</h2>
+                        <div class="flex items-center">
+                            <span class="rank-badge rank-gold mr-2">GOLD</span>
+                            <span class="text-sm text-old-lace/70">Member since 2022</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <p class="text-sm text-old-lace/70">Elo Rating</p>
+                        <p class="text-2xl font-bold text-goldenrod" id="elo-score">800</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Win Rate</p>
+                        <p class="text-2xl font-bold text-goldenrod">68%</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Matches</p>
+                        <p class="text-2xl font-bold text-goldenrod">24</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-sm">Next Rank: Diamond</p>
+                        <p class="text-sm font-medium">75%</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <button onclick="showScreen('matchmaking-screen')" class="btn-primary w-full py-3 rounded-lg font-semibold find-match-btn">Find a Match</button>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Recent Matches</h2>
+            <div class="space-y-3 mb-6">
+                <div class="card p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">vs. Minh Tran</p>
+                        <p class="text-sm text-old-lace/70">Yesterday, 8:30 PM</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 font-semibold mr-2">WIN</span>
+                        <span class="text-xs text-goldenrod">+15 Elo</span>
+                    </div>
+                </div>
+                
+                <div class="card p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">vs. Duc Pham</p>
+                        <p class="text-sm text-old-lace/70">Yesterday, 7:15 PM</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-red-400 font-semibold mr-2">LOSS</span>
+                        <span class="text-xs text-goldenrod">-8 Elo</span>
+                    </div>
+                </div>
+                
+                <div class="card p-4 flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">vs. Linh Nguyen</p>
+                        <p class="text-sm text-old-lace/70">2 days ago</p>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-400 font-semibold mr-2">WIN</span>
+                        <span class="text-xs text-goldenrod">+12 Elo</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Upcoming Tournaments</h2>
+            <div class="card p-4 tournament-card mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-goldenrod">Weekend Challenge</h3>
+                    <span class="text-xs bg-goldenrod/20 text-goldenrod px-2 py-1 rounded">In 2 days</span>
+                </div>
+                <p class="text-sm text-old-lace/70 mb-3">16 players, single elimination</p>
+                <button onclick="showScreen('tournament-screen')" class="text-sm text-goldenrod font-medium">View Details →</button>
+            </div>
+            
+            <!-- Bottom Navigation -->
+            <div class="fixed bottom-0 left-0 right-0 bg-jet border-t border-dark-goldenrod flex justify-around items-center py-4 px-6 max-w-[430px] mx-auto">
+                <button onclick="showScreen('home-screen')" class="nav-item active flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span class="text-xs mt-1">Home</span>
+                </button>
+                <button onclick="showScreen('booking-screen')" class="nav-item flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-xs mt-1">Book</span>
+                </button>
+                <button onclick="showScreen('tournament-screen')" class="nav-item flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">Tournaments</span>
+                </button>
+                <button onclick="showScreen('loyalty-screen')" class="nav-item flex flex-col items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-xs mt-1">Loyalty</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Matchmaking Screen -->
+        <div id="matchmaking-screen" class="screen hidden-screen p-6">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('home-screen')" class="mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 class="cinzel text-2xl font-bold text-goldenrod">Find a Match</h1>
+            </div>
+            
+            <div class="card p-5 mb-6">
+                <h2 class="font-semibold text-lg mb-4">Match Preferences</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Game Type</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="game-type-btn btn-selected py-2 rounded-lg" data-type="8-ball">8-Ball</button>
+                        <button class="game-type-btn btn-secondary py-2 rounded-lg" data-type="9-ball">9-Ball</button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Elo Range</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="elo-range-btn btn-secondary py-2 rounded-lg text-sm" data-range="50">±50 Elo</button>
+                        <button class="elo-range-btn btn-selected py-2 rounded-lg text-sm" data-range="100">±100 Elo</button>
+                        <button class="elo-range-btn btn-secondary py-2 rounded-lg text-sm" data-range="200">±200 Elo</button>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Match Type</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="match-type-btn btn-selected py-2 rounded-lg" data-type="casual">Casual</button>
+                        <button class="match-type-btn btn-secondary py-2 rounded-lg" data-type="ranked">Ranked</button>
+                    </div>
+                </div>
+                
+                <button id="start-matching-btn" class="btn-primary w-full py-3 rounded-lg font-semibold pulse">Start Matching</button>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Players Near You</h2>
+            <div class="space-y-3">
+                <div class="card p-4 flex items-center">
+                    <div class="w-12 h-12 bg-dark-goldenrod rounded-full flex items-center justify-center mr-4">
+                        <span class="font-bold">HP</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <p class="font-medium">Hoang Pham</p>
+                            <span class="text-sm text-goldenrod">820 Elo</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-old-lace/70">Online now</p>
+                            <span class="rank-badge rank-gold text-xs">GOLD</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card p-4 flex items-center">
+                    <div class="w-12 h-12 bg-dark-goldenrod rounded-full flex items-center justify-center mr-4">
+                        <span class="font-bold">LN</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <p class="font-medium">Linh Nguyen</p>
+                            <span class="text-sm text-goldenrod">785 Elo</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-old-lace/70">Last seen: 5m ago</p>
+                            <span class="rank-badge rank-silver text-xs">SILVER</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card p-4 flex items-center">
+                    <div class="w-12 h-12 bg-dark-goldenrod rounded-full flex items-center justify-center mr-4">
+                        <span class="font-bold">DT</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <p class="font-medium">Duc Tran</p>
+                            <span class="text-sm text-goldenrod">912 Elo</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm text-old-lace/70">Last seen: 20m ago</p>
+                            <span class="rank-badge rank-diamond text-xs">DIAMOND</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Match Found Overlay -->
+        <div id="match-found-overlay" class="match-found-overlay">
+            <div class="text-center mb-8">
+                <h2 class="cinzel text-3xl font-bold text-goldenrod mb-2">Match Found!</h2>
+                <p class="text-old-lace/70">Your opponent is ready</p>
+            </div>
+            
+            <div class="flex items-center justify-center mb-8">
+                <div class="flex flex-col items-center mr-4">
+                    <div class="player-avatar mb-2">
+                        <span>TN</span>
+                    </div>
+                    <p class="font-medium">You</p>
+                    <p class="text-sm text-goldenrod">800 Elo</p>
+                </div>
+                
+                <div class="vs-badge">VS</div>
+                
+                <div class="flex flex-col items-center ml-4">
+                    <div class="player-avatar mb-2">
+                        <span>HP</span>
+                    </div>
+                    <p class="font-medium">Hoang Pham</p>
+                    <p class="text-sm text-goldenrod">820 Elo</p>
+                </div>
+            </div>
+            
+            <div class="card p-4 w-full max-w-xs mb-6">
+                <h3 class="font-medium text-center mb-3">Match Details</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="text-old-lace/70">Game Type:</div>
+                    <div class="text-right" id="match-game-type">8-Ball</div>
+                    
+                    <div class="text-old-lace/70">Match Type:</div>
+                    <div class="text-right" id="match-type">Casual</div>
+                    
+                    <div class="text-old-lace/70">Table:</div>
+                    <div class="text-right">Table 3</div>
+                    
+                    <div class="text-old-lace/70">Time:</div>
+                    <div class="text-right">Now</div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="cancelMatch()" class="btn-secondary py-3 px-6 rounded-lg">Cancel</button>
+                <button onclick="acceptMatch()" class="btn-primary py-3 px-6 rounded-lg">Accept Match</button>
+            </div>
+        </div>
+        
+        <!-- Searching for Match Overlay -->
+        <div id="searching-overlay" class="match-found-overlay">
+            <div class="flex flex-col items-center">
+                <svg class="spinner mb-6" width="60" height="60" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="#D5A038" stroke-width="2" fill="none" stroke-dasharray="30 10" />
+                </svg>
+                <h2 class="cinzel text-2xl font-bold text-goldenrod mb-2">Searching for Match</h2>
+                <p class="text-old-lace/70 mb-6" id="search-details">8-Ball • Casual • ±100 Elo</p>
+                <button onclick="cancelSearch()" class="btn-secondary py-2 px-6 rounded-lg">Cancel</button>
+            </div>
+        </div>
+        
+        <!-- Booking Screen -->
+        <div id="booking-screen" class="screen hidden-screen p-6">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('home-screen')" class="mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 class="cinzel text-2xl font-bold text-goldenrod">Book a Table</h1>
+            </div>
+            
+            <div class="card p-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="prev-date" class="text-goldenrod">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="font-semibold text-lg" id="current-date">Today, July 15</h2>
+                    <button id="next-date" class="text-goldenrod">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="flex space-x-3 overflow-x-auto pb-2 mb-2">
+                    <div class="flex flex-col items-center min-w-[60px]">
+                        <div class="w-10 h-10 rounded-full bg-goldenrod flex items-center justify-center mb-1">
+                            <span class="font-bold text-jet">15</span>
+                        </div>
+                        <span class="text-xs">Today</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px]">
+                        <div class="w-10 h-10 rounded-full bg-jet border border-goldenrod flex items-center justify-center mb-1">
+                            <span class="font-bold">16</span>
+                        </div>
+                        <span class="text-xs">Fri</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px]">
+                        <div class="w-10 h-10 rounded-full bg-jet border border-goldenrod flex items-center justify-center mb-1">
+                            <span class="font-bold">17</span>
+                        </div>
+                        <span class="text-xs">Sat</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px]">
+                        <div class="w-10 h-10 rounded-full bg-jet border border-goldenrod flex items-center justify-center mb-1">
+                            <span class="font-bold">18</span>
+                        </div>
+                        <span class="text-xs">Sun</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px]">
+                        <div class="w-10 h-10 rounded-full bg-jet border border-goldenrod flex items-center justify-center mb-1">
+                            <span class="font-bold">19</span>
+                        </div>
+                        <span class="text-xs">Mon</span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-3 overflow-x-auto pb-2">
+                    <button class="min-w-[80px] py-2 px-3 rounded-lg bg-goldenrod text-jet font-medium text-sm">6:00 PM</button>
+                    <button class="min-w-[80px] py-2 px-3 rounded-lg bg-jet border border-goldenrod text-old-lace font-medium text-sm">7:00 PM</button>
+                    <button class="min-w-[80px] py-2 px-3 rounded-lg bg-jet border border-goldenrod text-old-lace font-medium text-sm">8:00 PM</button>
+                    <button class="min-w-[80px] py-2 px-3 rounded-lg bg-jet border border-goldenrod text-old-lace font-medium text-sm">9:00 PM</button>
+                </div>
+            </div>
+            
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="cinzel text-xl font-semibold">Available Tables</h2>
+                <div class="flex items-center text-xs">
+                    <span class="w-3 h-3 bg-green-500/50 rounded-full mr-1"></span>
+                    <span class="mr-2">Available</span>
+                    <span class="w-3 h-3 bg-red-500/50 rounded-full mr-1"></span>
+                    <span class="mr-2">Occupied</span>
+                    <span class="w-3 h-3 bg-goldenrod/50 rounded-full mr-1"></span>
+                    <span>Premium</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="table-cell table-available p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium">Table 1</h3>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Available</span>
+                    </div>
+                    <p class="text-xs text-old-lace/70 mb-3">Standard • 8ft</p>
+                    <button class="w-full py-2 bg-goldenrod text-jet rounded-lg text-sm font-medium">Book Now</button>
+                </div>
+                
+                <div class="table-cell table-occupied p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium">Table 2</h3>
+                        <span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Occupied</span>
+                    </div>
+                    <p class="text-xs text-old-lace/70 mb-3">Standard • 8ft</p>
+                    <button class="w-full py-2 bg-jet/50 text-old-lace/50 rounded-lg text-sm font-medium" disabled>Unavailable</button>
+                </div>
+                
+                <div class="table-cell table-premium p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium">Table 3</h3>
+                        <span class="text-xs bg-goldenrod/20 text-goldenrod px-2 py-1 rounded">Premium</span>
+                    </div>
+                    <p class="text-xs text-old-lace/70 mb-3">Tournament • 9ft</p>
+                    <button class="w-full py-2 bg-goldenrod text-jet rounded-lg text-sm font-medium flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Use 200 Points
+                    </button>
+                </div>
+                
+                <div class="table-cell table-available p-4 rounded-lg">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-medium">Table 4</h3>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Available</span>
+                    </div>
+                    <p class="text-xs text-old-lace/70 mb-3">Standard • 8ft</p>
+                    <button class="w-full py-2 bg-goldenrod text-jet rounded-lg text-sm font-medium">Book Now</button>
+                </div>
+            </div>
+            
+            <div class="card p-4 mb-6">
+                <h3 class="font-medium mb-2">Your Loyalty Points</h3>
+                <div class="flex justify-between items-center">
+                    <p class="text-2xl font-bold text-goldenrod">1,250</p>
+                    <button onclick="showScreen('loyalty-screen')" class="text-sm text-goldenrod font-medium">View Benefits →</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loyalty Screen -->
+        <div id="loyalty-screen" class="screen hidden-screen p-6">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('home-screen')" class="mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 class="cinzel text-2xl font-bold text-goldenrod">Loyalty Program</h1>
+            </div>
+            
+            <div class="card p-5 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="font-semibold text-lg">Tran Nguyen</h2>
+                        <div class="flex items-center">
+                            <span class="rank-badge rank-gold mr-2">GOLD</span>
+                            <span class="text-sm text-old-lace/70">Since March 2023</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-old-lace/70">Total Points</p>
+                        <p class="text-2xl font-bold text-goldenrod">1,250</p>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-sm">Next Rank: Diamond</p>
+                        <p class="text-sm font-medium">75%</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                    <p class="text-xs text-old-lace/70 mt-1">750 more points needed</p>
+                </div>
+                
+                <div class="flex justify-between text-sm">
+                    <div class="flex flex-col items-center">
+                        <span class="text-old-lace/70">Total Spent</span>
+                        <span class="font-semibold">$1,850</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-old-lace/70">Visits</span>
+                        <span class="font-semibold">24</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-old-lace/70">Tournaments</span>
+                        <span class="font-semibold">6</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Your Benefits</h2>
+            <div class="space-y-3 mb-6">
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-goldenrod">Premium Table Access</h3>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Unlocked</span>
+                    </div>
+                    <p class="text-sm text-old-lace/70 mb-2">Book premium tables using loyalty points</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-goldenrod">Free Drinks</h3>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Unlocked</span>
+                    </div>
+                    <p class="text-sm text-old-lace/70 mb-2">1 free drink per visit</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-goldenrod">Tournament Discount</h3>
+                        <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Unlocked</span>
+                    </div>
+                    <p class="text-sm text-old-lace/70 mb-2">20% off tournament entry fees</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-old-lace/70">Private Room Access</h3>
+                        <span class="text-xs bg-goldenrod/20 text-goldenrod px-2 py-1 rounded">Diamond Tier</span>
+                    </div>
+                    <p class="text-sm text-old-lace/70 mb-2">Access to exclusive private rooms</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <div class="card p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-medium text-old-lace/70">Personal Cue Storage</h3>
+                        <span class="text-xs bg-old-lace/20 text-old-lace px-2 py-1 rounded">Black Tier</span>
+                    </div>
+                    <p class="text-sm text-old-lace/70 mb-2">Store your personal cue at the club</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Top Members</h2>
+            <div class="card p-4 mb-6">
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-dark-goldenrod">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</div>
+                        <div>
+                            <p class="font-medium">Duc Tran</p>
+                            <span class="rank-badge rank-black text-xs">BLACK</span>
+                        </div>
+                    </div>
+                    <p class="font-semibold text-goldenrod">3,850 pts</p>
+                </div>
+                
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-dark-goldenrod">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</div>
+                        <div>
+                            <p class="font-medium">Minh Pham</p>
+                            <span class="rank-badge rank-diamond text-xs">DIAMOND</span>
+                        </div>
+                    </div>
+                    <p class="font-semibold text-goldenrod">2,740 pts</p>
+                </div>
+                
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-dark-goldenrod">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</div>
+                        <div>
+                            <p class="font-medium">Linh Nguyen</p>
+                            <span class="rank-badge rank-diamond text-xs">DIAMOND</span>
+                        </div>
+                    </div>
+                    <p class="font-semibold text-goldenrod">2,120 pts</p>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">8</div>
+                        <div>
+                            <p class="font-medium">You</p>
+                            <span class="rank-badge rank-gold text-xs">GOLD</span>
+                        </div>
+                    </div>
+                    <p class="font-semibold text-goldenrod">1,250 pts</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tournament Screen -->
+        <div id="tournament-screen" class="screen hidden-screen p-6">
+            <div class="flex items-center mb-6">
+                <button onclick="showScreen('home-screen')" class="mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 class="cinzel text-2xl font-bold text-goldenrod">Tournaments</h1>
+            </div>
+            
+            <div class="card p-5 mb-6 tournament-card">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="font-semibold text-lg text-goldenrod">Weekend Challenge</h2>
+                        <p class="text-sm text-old-lace/70">July 17-18, 2023</p>
+                    </div>
+                    <span class="text-xs bg-goldenrod/20 text-goldenrod px-2 py-1 rounded">In 2 days</span>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>16 players, single elimination</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Entry fee: $50 (20% off with Gold tier)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Starts at 7:00 PM</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-old-lace/70">Prize Pool</p>
+                        <p class="text-xl font-bold text-goldenrod">$800</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Registered</p>
+                        <p class="text-xl font-bold text-goldenrod">9/16</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Game Type</p>
+                        <p class="text-xl font-bold text-goldenrod">8-Ball</p>
+                    </div>
+                </div>
+                
+                <button class="btn-primary w-full py-3 rounded-lg font-semibold">Register Now ($40)</button>
+            </div>
+            
+            <div class="card p-5 mb-6 tournament-card">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 class="font-semibold text-lg text-goldenrod">Summer Championship</h2>
+                        <p class="text-sm text-old-lace/70">August 5-7, 2023</p>
+                    </div>
+                    <span class="text-xs bg-goldenrod/20 text-goldenrod px-2 py-1 rounded">In 3 weeks</span>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>32 players, double elimination</span>
+                    </div>
+                    <div class="flex items-center mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Entry fee: $100 (20% off with Gold tier)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-goldenrod" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>3-day event</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-old-lace/70">Prize Pool</p>
+                        <p class="text-xl font-bold text-goldenrod">$3,200</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Registered</p>
+                        <p class="text-xl font-bold text-goldenrod">15/32</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-old-lace/70">Game Type</p>
+                        <p class="text-xl font-bold text-goldenrod">9-Ball</p>
+                    </div>
+                </div>
+                
+                <button class="btn-primary w-full py-3 rounded-lg font-semibold">Register Now ($80)</button>
+            </div>
+            
+            <h2 class="cinzel text-xl font-semibold mb-4">Past Results</h2>
+            <div class="card p-4 mb-6">
+                <h3 class="font-medium text-goldenrod mb-3">Spring Open 2023</h3>
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-dark-goldenrod">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">1</div>
+                        <p class="font-medium">Duc Tran</p>
+                    </div>
+                    <p class="font-semibold text-goldenrod">$1,200</p>
+                </div>
+                
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-dark-goldenrod">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">2</div>
+                        <p class="font-medium">Minh Pham</p>
+                    </div>
+                    <p class="font-semibold text-goldenrod">$600</p>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-dark-goldenrod rounded-full flex items-center justify-center mr-3 text-sm font-bold">3</div>
+                        <p class="font-medium">You</p>
+                    </div>
+                    <p class="font-semibold text-goldenrod">$300</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Screen navigation
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.add('hidden-screen');
+            });
+            
+            // Show the requested screen
+            const targetScreen = document.getElementById(screenId);
+            targetScreen.classList.remove('hidden-screen');
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate the corresponding nav item
+            if (screenId === 'home-screen') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (screenId === 'booking-screen') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+            } else if (screenId === 'tournament-screen') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+            } else if (screenId === 'loyalty-screen') {
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+            }
+            
+            // Hide overlays when changing screens
+            document.getElementById('match-found-overlay').classList.remove('active');
+            document.getElementById('searching-overlay').classList.remove('active');
+        }
+        
+        // Match preferences selection
+        let selectedGameType = '8-ball';
+        let selectedEloRange = '100';
+        let selectedMatchType = 'casual';
+        
+        // Game type selection
+        document.querySelectorAll('.game-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.game-type-btn').forEach(b => {
+                    b.classList.remove('btn-selected');
+                    b.classList.add('btn-secondary');
+                });
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-selected');
+                selectedGameType = this.dataset.type;
+                updateSearchDetails();
+            });
+        });
+        
+        // Elo range selection
+        document.querySelectorAll('.elo-range-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.elo-range-btn').forEach(b => {
+                    b.classList.remove('btn-selected');
+                    b.classList.add('btn-secondary');
+                });
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-selected');
+                selectedEloRange = this.dataset.range;
+                updateSearchDetails();
+            });
+        });
+        
+        // Match type selection
+        document.querySelectorAll('.match-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.match-type-btn').forEach(b => {
+                    b.classList.remove('btn-selected');
+                    b.classList.add('btn-secondary');
+                });
+                this.classList.remove('btn-secondary');
+                this.classList.add('btn-selected');
+                selectedMatchType = this.dataset.type;
+                updateSearchDetails();
+            });
+        });
+        
+        function updateSearchDetails() {
+            const gameType = selectedGameType === '8-ball' ? '8-Ball' : '9-Ball';
+            const matchType = selectedMatchType.charAt(0).toUpperCase() + selectedMatchType.slice(1);
+            document.getElementById('search-details').textContent = `${gameType} • ${matchType} • ±${selectedEloRange} Elo`;
+            document.getElementById('match-game-type').textContent = gameType;
+            document.getElementById('match-type').textContent = matchType;
+        }
+        
+        // Matchmaking functionality
+        document.getElementById('start-matching-btn').addEventListener('click', function() {
+            // Show searching overlay
+            document.getElementById('searching-overlay').classList.add('active');
+            
+            // After 3 seconds, show match found
+            setTimeout(() => {
+                document.getElementById('searching-overlay').classList.remove('active');
+                document.getElementById('match-found-overlay').classList.add('active');
+            }, 3000);
+        });
+        
+        function cancelSearch() {
+            document.getElementById('searching-overlay').classList.remove('active');
+        }
+        
+        function cancelMatch() {
+            document.getElementById('match-found-overlay').classList.remove('active');
+            showScreen('matchmaking-screen');
+        }
+        
+        function acceptMatch() {
+            document.getElementById('match-found-overlay').classList.remove('active');
+            showScreen('home-screen');
+            
+            // Update Elo score with animation
+            const eloScore = document.getElementById('elo-score');
+            const startValue = 800;
+            const endValue = 815;
+            const duration = 1500;
+            const startTime = performance.now();
+            
+            function updateCounter(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                const progress = Math.min(elapsedTime / duration, 1);
+                const currentValue = Math.floor(startValue + progress * (endValue - startValue));
+                
+                eloScore.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+            
+            // Add new match to recent matches
+            const recentMatchesContainer = document.querySelector('#home-screen .space-y-3');
+            const newMatch = document.createElement('div');
+            newMatch.className = 'card p-4 flex justify-between items-center';
+            newMatch.innerHTML = `
+                <div>
+                    <p class="font-medium">vs. Hoang Pham</p>
+                    <p class="text-sm text-old-lace/70">Just now</p>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-green-400 font-semibold mr-2">WIN</span>
+                    <span class="text-xs text-goldenrod">+15 Elo</span>
+                </div>
+            `;
+            
+            // Insert at the beginning
+            recentMatchesContainer.insertBefore(newMatch, recentMatchesContainer.firstChild);
+        }
+        
+        // Date navigation in booking screen
+        document.getElementById('prev-date').addEventListener('click', function() {
+            document.getElementById('current-date').textContent = 'Yesterday, July 14';
+        });
+        
+        document.getElementById('next-date').addEventListener('click', function() {
+            document.getElementById('current-date').textContent = 'Tomorrow, July 16';
+        });
+        
+        // Initialize with welcome screen
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('welcome-screen');
+            
+            // Animate progress bars on load
+            document.querySelectorAll('.progress-fill').forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 300);
+            });
+            
+            // Initialize search details
+            updateSearchDetails();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94c4eb6f17180884',t:'MTc0OTM0OTMyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
